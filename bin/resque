@@ -31,8 +31,12 @@ if(empty($QUEUE)) {
 }
 
 $REDIS_BACKEND = getenv('REDIS_BACKEND');
+$REDIS_BACKEND_DB = getenv('REDIS_BACKEND_DB');
 if(!empty($REDIS_BACKEND)) {
-	Resque::setBackend($REDIS_BACKEND);
+	if (empty($REDIS_BACKEND_DB)) 
+		Resque::setBackend($REDIS_BACKEND);
+	else
+		Resque::setBackend($REDIS_BACKEND, $REDIS_BACKEND_DB);
 }
 
 $logLevel = 0;
@@ -69,6 +73,12 @@ if(!empty($COUNT) && $COUNT > 1) {
 
 function cleanup_children($signal){
 	$GLOBALS['send_signal'] = $signal;
+}
+
+$PREFIX = getenv('PREFIX');
+if(!empty($PREFIX)) {
+    fwrite(STDOUT, '*** Prefix set to '.$PREFIX."\n");
+    Resque_Redis::prefix($PREFIX);
 }
 
 if($count > 1) {
